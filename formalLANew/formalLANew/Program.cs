@@ -40,21 +40,24 @@ namespace formalLANew
             NPDAToCFG(transitions, ref States, inputAlphabets, stackAlphabets, startStack, initialState);
 
 
-
-
-            var refinedRules = ChomskyNormalForm(null, null, null);
+            var refinedRules = ChomskyNormalForm();
 
             Console.WriteLine("Please enter input word: ");
-            string input=Console.ReadLine();
+            string input = Console.ReadLine();
 
-            bool result = Parse('b', input, refinedRules);
+            bool result = Parse(input, refinedRules);
 
             Console.WriteLine($"output: {result}");
             Console.WriteLine($"table: ");
-            WriteTable();
+            Console.WriteLine();
+            PrintTable();
         }
 
-        
+        public static List<List<string>> LastRules;
+        public static Dictionary<char, string> StatesDict;
+        public static string InitialState;
+        public static List<char> InputAlphabets;
+
         //convert NPDA to CFG
         static void NPDAToCFG(List<List<string>> transitions, ref int states, string[] inputAlphabets,
             string[] stackAlphabets, string startStack, char initialState)
@@ -210,17 +213,22 @@ namespace formalLANew
                 secondRules.Add(list);
             }
 
-            List<List<char>> lastRules;
-            Dictionary<char, string> States;
-            char InitialState;
-            List<char> InputAlphabets;
-            ConvertToChar(secondRules, initialState, inputAlphabets, out lastRules,
-                out States, out InitialState, out InputAlphabets);
+            //List<List<string>> lastRulesOut;
+            Dictionary<char, string> StatesOut;
+            char InitialStateOut;
+            List<char> InputAlphabetsOut;
+            ConvertToChar(secondRules, initialState, inputAlphabets,/* out lastRulesOut,*/
+                out StatesOut, out InitialStateOut, out InputAlphabetsOut);
+
+            //LastRules = lastRulesOut;
+            StatesDict = StatesOut;
+            InitialState = InitialStateOut.ToString();
+            InputAlphabets = InputAlphabetsOut;
         }
 
         //convert to correct type
-        private static void ConvertToChar(List<List<string>> rules, char initialState, string[] inputAlphabets,
-            out List<List<char>> lastRules, out Dictionary<char, string> States,
+        private static void ConvertToChar(List<List<string>> rules, char initialState, string[] inputAlphabets
+            /*,out List<List<string>> rules*/, out Dictionary<char, string> States,
             out char InitialState, out List<char> InputAlphabets)
         {
             InitialState = initialState;
@@ -268,74 +276,81 @@ namespace formalLANew
             }
 
             //convert string to char
-            lastRules = new List<List<char>>();
-            for (int i = 0; i < rules.Count; i++)
-            {
-                List<char> list = new List<char>();
-                for (int j = 0; j < rules[i].Count; j++)
-                {
-                    list.Add(rules[i][j].ToCharArray()[0]);
-                }
-                lastRules.Add(list);
-            }
+            //rules = new List<List<string>>();
+            //for (int i = 0; i < rules.Count; i++)
+            //{
+            //    List<string> list = new List<string>();
+            //    for (int j = 0; j < rules[i].Count; j++)
+            //    {
+            //        list.Add(rules[i][j]/*.ToCharArray()[0]*/);
+            //    }
+            //    rules.Add(list);
+            //}
+            LastRules = rules;
 
             InputAlphabets = new List<char>();
             for (int i = 0; i < inputAlphabets.Length; i++)
                 InputAlphabets.Add(inputAlphabets[i].ToCharArray()[0]);
-
         }
 
 
         //preparation for part two
-        public static List<List<char>> ChomskyNormalForm(List<List<char>> rules, Dictionary<char, string> states, List<char> inputAlphabet)
+        public static List<List<string>> ChomskyNormalForm()
         {
-            List<List<char>> refinedRules = new List<List<char>>();
-            Dictionary<char, char> terminalRules = new Dictionary<char, char>();
+            var refinedRules = new List<List<string>>();
+            var terminalRules = new Dictionary<char, int>();
 
 
             //adding terminal producitons
-            foreach (char ch in inputAlphabet)
+            foreach (char ch in InputAlphabets)
             {
-                terminalRules.Add(ch, char.Parse(rules.Count.ToString()));
+                terminalRules.Add(ch, LastRules.Count);
 
-                rules.Add(new List<char> (){ char.Parse(rules.Count.ToString()), ch });//عدد استیت میشه اخرین عددی که تا اونجا داشتیم
+                LastRules.Add(new List<string>() { LastRules.Count.ToString(), ch.ToString() });//عدد استیت میشه اخرین عددی که تا اونجا داشتیم
                 //states.Add(char.Parse(states.Count.ToString()), ch.ToString());
             }
 
             int i = 0;
-            foreach (List<char> rule in rules)
+            foreach (List<string> rule in LastRules)
             {
-                if (rule.Count > 2)
+                if (rule.Count == 4)//== ۴
                 {
-                    char terminalStateNum = terminalRules[rule[1]];
+                    int terminalStateNum = terminalRules[rule[1][0]];
 
-                    var partOne = new List<char>() { rule[0], terminalStateNum, char.Parse((rules.Count + i).ToString()) };
-                    var partTwo = new List<char>() { char.Parse((rules.Count + i).ToString()), rule[2], rule[3] };
+                    var partOne = new List<string>() { rule[0], terminalStateNum.ToString(), (LastRules.Count + i).ToString() };
+                    var partTwo = new List<string>() { (LastRules.Count + i).ToString(), rule[2], rule[3] };
 
-                    refinedRules.Add(partOne);
-                    refinedRules.Add(partTwo);
+                    if (!Repetitive(/*LastRules.Count, i, */partOne, refinedRules))
+                        refinedRules.Add(partOne);
 
-                    i++;
+                    if (!Repetitive(/*LastRules.Count, i, */partTwo, refinedRules))
+                    {
+                        refinedRules.Add(partTwo);
+
+                        i++;
+                    }
+
                     //states.Add(char.Parse(states.Count.ToString()), ch.ToString());
                 }
 
-                else
+                else if (rule[1] != "_")
                     refinedRules.Add(rule);
             }
 
             return refinedRules;
         }
 
+        private static bool Repetitive(/*int count, int i, */List<string> newProduction, List<List<string>> refinedRules) => refinedRules.Exists(p => p == newProduction);
 
         //part two
 
         public static bool[,,] Table;
-        public static List<List<char>> ProductionRules;
+        public static List<List<string>> ProductionRules;
         public static string InputWord;
         public static int ProductionRulesCount;
 
 
-        public static bool Parse(char initialState, string inputWord, List<List<char>> rules)
+        public static bool Parse(string inputWord, List<List<string>> rules)
         {
             InputWord = inputWord;
             ProductionRules = rules;
@@ -349,7 +364,7 @@ namespace formalLANew
             {
                 for (int j = 0; j < ProductionRulesCount; j++)
                 {
-                    if (Check(ProductionRules[j], InputWord[i]))
+                    if (Check(ProductionRules[j], InputWord[i].ToString()))
                         Table[i, 0, j] = true;
                 }
             }
@@ -383,16 +398,16 @@ namespace formalLANew
 
             // determine result
             for (int i = 0; i < ProductionRulesCount; i++)
-                if (Table[0, InputWord.Length - 1, i] && ProductionRules[i][0] == initialState)
+                if (Table[0, InputWord.Length - 1, i] && ProductionRules[i][0] == InitialState)
                     return true;
 
             return false;
         }
 
         //check whether this production produces var1var2
-        private static bool Check(List<char> production, char rightHandVar1, char rightHandVar2)
+        private static bool Check(List<string> production, string rightHandVar1, string rightHandVar2)
         {
-            if (production.Count <= 2)
+            if (production.Count == 2)
                 return false;
 
             if (production[1] == rightHandVar1 && production[2] == rightHandVar2)
@@ -402,7 +417,7 @@ namespace formalLANew
         }
 
         //check whether production produces terminal ch
-        private static bool Check(List<char> production, char ch)
+        private static bool Check(List<string> production, string ch)
         {
             for (int i = 1; i < production.Count; i++)// بعد از اون سمت چپیه
                 if (ch == production[i])
@@ -412,13 +427,13 @@ namespace formalLANew
         }
 
         //cyk table
-        public static void WriteTable()
+        public static void PrintTable()
         {
-            for (int i = InputWord.Length - 1; i >= 0; i--)
+            for (int i = 0; i < InputWord.Length; i++)
             {
                 for (int j = 0; j < InputWord.Length; j++)
                 {
-                    Console.Write('|');
+                    Console.Write("|");
 
                     for (int k = 0; k < ProductionRulesCount; k++)
                     {
@@ -428,7 +443,7 @@ namespace formalLANew
                             Console.Write(' ');
                     }
                     if (j == InputWord.Length - 1)
-                        Console.Write('|');
+                        Console.Write("||");
                 }
                 Console.WriteLine();
             }
