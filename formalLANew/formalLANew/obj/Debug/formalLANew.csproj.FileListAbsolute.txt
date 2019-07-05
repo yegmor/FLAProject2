@@ -1,0 +1,7 @@
+E:\fla\FLAProject2\formalLANew\formalLANew\obj\Debug\formalLANew.csprojAssemblyReference.cache
+E:\fla\FLAProject2\formalLANew\formalLANew\obj\Debug\formalLANew.csproj.CoreCompileInputs.cache
+E:\fla\FLAProject2\formalLANew\formalLANew\bin\Debug\formalLANew.exe.config
+E:\fla\FLAProject2\formalLANew\formalLANew\bin\Debug\formalLANew.exe
+E:\fla\FLAProject2\formalLANew\formalLANew\bin\Debug\formalLANew.pdb
+E:\fla\FLAProject2\formalLANew\formalLANew\obj\Debug\formalLANew.exe
+E:\fla\FLAProject2\formalLANew\formalLANew\obj\Debug\formalLANew.pdb

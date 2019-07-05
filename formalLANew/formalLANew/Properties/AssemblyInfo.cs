@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FLAProject2")]
+[assembly: AssemblyTitle("formalLANew")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FLAProject2")]
+[assembly: AssemblyProduct("formalLANew")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("93d5587e-c648-438e-b1c6-83f8d98647a0")]
+[assembly: Guid("f8359f8c-3bff-4e7d-ad2f-1101ad93acb3")]
 
 // Version information for an assembly consists of the following four values:
 //

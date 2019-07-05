@@ -1,2 +1,0 @@
-C:\Users\Asus\Desktop\FLAProject2\FLAProject2\obj\Debug\FLAProject2.csprojAssemblyReference.cache
-C:\Users\Asus\Desktop\FLAProject2\FLAProject2\obj\Debug\FLAProject2.csproj.CoreCompileInputs.cache
