@@ -355,11 +355,18 @@ namespace formalLANew
             {
                 if (rule.Count == 4)
                 {
+                    int terminalStateNum = terminalRules[rule[1][0]];
+
                     if (rule[2] == finalState && rule[3] != finalState)
-                        refinedRules.Add(new List<string>() { rule[0], rule[1], rule[3] });
+                    {
+                        refinedRules.Add(new List<string>() { rule[0], terminalStateNum.ToString(), rule[3] });
+
+                    }
 
                     if (rule[3] == finalState && rule[2] != finalState)
-                        refinedRules.Add(new List<string>() { rule[0], rule[1], rule[2] });
+                    {
+                        refinedRules.Add(new List<string>() { rule[0], terminalStateNum.ToString(), rule[2] });
+                    }
 
                     if (rule[2] == finalState && rule[3] == finalState)
                         refinedRules.Add(new List<string>() { rule[0], rule[1] });
