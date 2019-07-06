@@ -15,7 +15,7 @@ namespace formalLANew
             string[] stackAlphabets = Input.ReadLine().Split(',');
             string startStack = Input.ReadLine();
             char initialState = '0';
-            int finalState;
+            string finalState;
             List<List<string>> transitions = new List<List<string>>();
             List<string> transition = new List<string>();
             string temp;
@@ -32,8 +32,8 @@ namespace formalLANew
 
                 if (transition[4].Substring(0, 1) == "*")
                 {
-                    finalState = int.Parse(transition[4].Substring(2));
-                    transition[4] = "qf";
+                    finalState = transition[4].Substring(1);
+                    transition[4] = finalState;
                 }
                 transitions.Add(transition);
             }
@@ -105,6 +105,8 @@ namespace formalLANew
                     Console.Write(rules[i][j]);
                 Console.WriteLine();
             }
+
+
         }
 
         //make transitions to normal form
@@ -164,7 +166,6 @@ namespace formalLANew
                     temp.Add(t1);
                     transitions.Add(temp);
                 }
-
             }
         }
 
@@ -240,16 +241,16 @@ namespace formalLANew
                 if (!ruleNum.Contains(rules[i][0]))
                     ruleNum.Add(rules[i][0]);
             }
-            for (int i = 0; i < rules.Count; i++)
-            {
-                if (rules[i].Count > 2)
-                {
-                    if (!ruleNum.Contains(rules[i][2]))
-                        ruleNum.Add(rules[i][2]);
-                    if (!ruleNum.Contains(rules[i][3]))
-                        ruleNum.Add(rules[i][3]);
-                }
-            }
+            //for (int i = 0; i < rules.Count; i++)
+            //{
+            //    if (rules[i].Count > 2)
+            //    {
+            //        if (!ruleNum.Contains(rules[i][2]))
+            //            ruleNum.Add(rules[i][2]);
+            //        if (!ruleNum.Contains(rules[i][3]))
+            //            ruleNum.Add(rules[i][3]);
+            //    }
+            //}
 
             //add states to dictionary
             States = new Dictionary<char, string>();
@@ -274,6 +275,42 @@ namespace formalLANew
                     }
                 }
             }
+
+            for (int i = 0; i < rules.Count; i++)
+            {
+                if (rules[i].Count > 2)
+                {
+                    if (rules[i][2].Length > 1)
+                    {
+                        rules.RemoveAt(i);
+                        break;
+                    }
+                    if (rules[i][3].Length > 1)
+                        rules.RemoveAt(i);
+                }
+            }
+
+            //delete useless variables
+            List<string> useful = new List<string>();
+            for (int i = 0; i < rules.Count; i++)
+            {
+                if (rules[i][1] == "_" || rules[i].Count == 2)
+                    useful.Add(rules[i][0]);
+            }
+            for (int i = 0; i < rules.Count; i++)
+                if (rules[i].Count > 2)
+                    if (useful.Contains(rules[i][2]) && useful.Contains(rules[i][3]))
+                        useful.Add(rules[i][0]);
+            for (int i = rules.Count - 1; i >= 0; i--)
+                if (rules[i].Count > 2)
+                    if (useful.Contains(rules[i][2]) && useful.Contains(rules[i][3]))
+                        useful.Add(rules[i][0]);
+
+            for (int i = 0; i < rules.Count; i++)
+                if (rules[i].Count > 2)
+                    if (!(useful.Contains(rules[i][0]) && useful.Contains(rules[i][2]) && useful.Contains(rules[i][3])))
+                        rules.RemoveAt(i);
+
 
             //convert string to char
             //rules = new List<List<string>>();
@@ -300,14 +337,33 @@ namespace formalLANew
             var refinedRules = new List<List<string>>();
             var terminalRules = new Dictionary<char, int>();
 
+            string finalState = "";
+            foreach (List<string> rule in LastRules)
+                if (rule[1] == "_")
+                    finalState = rule[0];
 
-            //adding terminal producitons
+            //adding terminal productions
             foreach (char ch in InputAlphabets)
             {
                 terminalRules.Add(ch, LastRules.Count);
 
                 LastRules.Add(new List<string>() { LastRules.Count.ToString(), ch.ToString() });//عدد استیت میشه اخرین عددی که تا اونجا داشتیم
                 //states.Add(char.Parse(states.Count.ToString()), ch.ToString());
+            }
+
+            foreach (List<string> rule in LastRules)
+            {
+                if (rule.Count == 4)
+                {
+                    if (rule[2] == finalState && rule[3] != finalState)
+                        refinedRules.Add(new List<string>() { rule[0], rule[1], rule[3] });
+
+                    if (rule[3] == finalState && rule[2] != finalState)
+                        refinedRules.Add(new List<string>() { rule[0], rule[1], rule[2] });
+
+                    if (rule[2] == finalState && rule[3] == finalState)
+                        refinedRules.Add(new List<string>() { rule[0], rule[1] });
+                }
             }
 
             int i = 0;
@@ -333,7 +389,7 @@ namespace formalLANew
                     //states.Add(char.Parse(states.Count.ToString()), ch.ToString());
                 }
 
-                else if (rule[1] != "_")
+                else/* if (rule[1] != "_")*/
                     refinedRules.Add(rule);
             }
 
